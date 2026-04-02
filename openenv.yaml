@@ -1,0 +1,99 @@
+name: email-sorting-env
+version: "1.0.0"
+description: "A real-world email sorting environment where an AI agent classifies emails as spam, important, or promotion. Includes easy, medium, and hard difficulty levels with meaningful reward signals."
+
+author: "Mayur Patil"
+task_type: classification
+
+observation_space:
+  type: dict
+  fields:
+    email:
+      type: dict
+      fields:
+        subject:
+          type: string
+          description: "The subject line of the email"
+        body:
+          type: string
+          description: "The body content of the email"
+        sender:
+          type: string
+          description: "The sender email address"
+    step:
+      type: integer
+      description: "Current step number in the episode"
+    max_steps:
+      type: integer
+      description: "Maximum steps allowed per episode"
+    total_reward:
+      type: float
+      description: "Cumulative reward so far"
+    done:
+      type: boolean
+      description: "Whether the episode is finished"
+    valid_actions:
+      type: list
+      description: "List of valid actions the agent can take"
+
+action_space:
+  type: string
+  values:
+    - spam
+    - important
+    - promotion
+  description: "Agent must classify each email into one of these three categories"
+
+reward:
+  range: [-0.5, 1.0]
+  description: "Positive reward for correct classification, negative for wrong. Higher reward for harder difficulty."
+  breakdown:
+    easy_correct: 0.5
+    medium_correct: 0.75
+    hard_correct: 1.0
+    easy_wrong: -0.5
+    medium_wrong: -0.3
+    hard_wrong: -0.1
+    invalid_action: -0.2
+
+tasks:
+  - id: easy_sorting
+    name: "Easy Email Sorting"
+    description: "Sort obviously spam emails like prize winning scams"
+    difficulty: easy
+    score_range: [0.0, 1.0]
+
+  - id: medium_sorting
+    name: "Medium Email Sorting"
+    description: "Distinguish between newsletters, promotions, and important emails"
+    difficulty: medium
+    score_range: [0.0, 1.0]
+
+  - id: hard_sorting
+    name: "Hard Email Sorting"
+    description: "Detect phishing emails disguised as banks and trusted services"
+    difficulty: hard
+    score_range: [0.0, 1.0]
+
+episode:
+  max_steps: 10
+  reset_on_done: true
+
+api:
+  endpoints:
+    - name: reset
+      method: POST
+      path: /reset
+      description: "Reset environment and return initial state"
+    - name: step
+      method: POST
+      path: /step
+      description: "Take action and return next state, reward, done, info"
+    - name: state
+      method: GET
+      path: /state
+      description: "Return current state without taking action"
+```
+
+
+
