@@ -100,6 +100,21 @@ def run_graders():
     avg = round(sum(t.score for t in tasks) / len(tasks), 4)
     return GradersResponse(tasks=tasks, average_score=avg)
 
+@app.get("/graders/easy_sorting")
+def grade_easy():
+    from graders import grade_easy_sorting
+    return {"task_id": "easy_sorting", "score": grade_easy_sorting()}
+
+@app.get("/graders/medium_sorting")
+def grade_medium():
+    from graders import grade_medium_sorting
+    return {"task_id": "medium_sorting", "score": grade_medium_sorting()}
+
+@app.get("/graders/hard_sorting")
+def grade_hard():
+    from graders import grade_hard_sorting
+    return {"task_id": "hard_sorting", "score": grade_hard_sorting()}
+
 # ============================================
 # START SERVER
 # ============================================

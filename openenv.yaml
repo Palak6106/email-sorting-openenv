@@ -63,6 +63,7 @@ tasks:
     difficulty: easy
     score_range: [0.01, 0.99]
     grader: grade_easy_sorting
+    grader_endpoint: /graders/easy_sorting
 
   - id: medium_sorting
     name: "Medium Email Sorting"
@@ -70,6 +71,7 @@ tasks:
     difficulty: medium
     score_range: [0.01, 0.99]
     grader: grade_medium_sorting
+    grader_endpoint: /graders/medium_sorting
 
   - id: hard_sorting
     name: "Hard Email Sorting"
@@ -77,6 +79,7 @@ tasks:
     difficulty: hard
     score_range: [0.01, 0.99]
     grader: grade_hard_sorting
+    grader_endpoint: /graders/hard_sorting
 
 episode:
   max_steps: 10
