@@ -1,6 +1,7 @@
 """
 graders.py — Email Sorting OpenEnv
-3 grader tasks: easy, medium, hard. Scores strictly in (0, 1).
+3 grader tasks: easy, medium, hard.
+Each grader returns a float score strictly in (0.0, 1.0).
 """
 
 
@@ -33,13 +34,13 @@ EASY_EMAILS = [
     {"subject": "Your invoice is ready", "body": "Please find your monthly invoice attached.", "label": "important"},
 ]
 
-def grade_easy_sorting(agent_fn=None):
+def grade_easy_sorting(agent_fn=None) -> float:
+    """Returns score strictly in (0.0, 1.0)."""
     if agent_fn is None:
         agent_fn = baseline_agent
     correct = sum(1 for e in EASY_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(EASY_EMAILS)
-    score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "easy_sorting", "correct": correct, "total": len(EASY_EMAILS), "score": score}
+    return round(min(0.99, max(0.01, raw)), 2)
 
 
 # ============================================
@@ -55,13 +56,13 @@ MEDIUM_EMAILS = [
     {"subject": "Urgent: verify your account", "body": "Your account will be suspended. Click to verify.", "label": "spam"},
 ]
 
-def grade_medium_sorting(agent_fn=None):
+def grade_medium_sorting(agent_fn=None) -> float:
+    """Returns score strictly in (0.0, 1.0)."""
     if agent_fn is None:
         agent_fn = baseline_agent
     correct = sum(1 for e in MEDIUM_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(MEDIUM_EMAILS)
-    score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "medium_sorting", "correct": correct, "total": len(MEDIUM_EMAILS), "score": score}
+    return round(min(0.99, max(0.01, raw)), 2)
 
 
 # ============================================
@@ -79,13 +80,13 @@ HARD_EMAILS = [
     {"subject": "You've been pre-approved!", "body": "You qualify for a $50,000 loan. Apply now.", "label": "spam"},
 ]
 
-def grade_hard_sorting(agent_fn=None):
+def grade_hard_sorting(agent_fn=None) -> float:
+    """Returns score strictly in (0.0, 1.0)."""
     if agent_fn is None:
         agent_fn = baseline_agent
     correct = sum(1 for e in HARD_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(HARD_EMAILS)
-    score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "hard_sorting", "correct": correct, "total": len(HARD_EMAILS), "score": score}
+    return round(min(0.99, max(0.01, raw)), 2)
 
 
 # ============================================
@@ -96,25 +97,19 @@ def run_all_graders(agent_fn=None):
     if agent_fn is None:
         agent_fn = baseline_agent
 
-    results = [
-        grade_easy_sorting(agent_fn),
-        grade_medium_sorting(agent_fn),
-        grade_hard_sorting(agent_fn),
-    ]
-
-    avg_score = round(sum(r["score"] for r in results) / len(results), 4)
-    print(f"[GRADER] easy={results[0]['score']} medium={results[1]['score']} hard={results[2]['score']} avg={avg_score}", flush=True)
-
-    return {
-        "tasks": results,
-        "average_score": avg_score,
-        "all_passed": all(0 < r["score"] < 1 for r in results)
+    scores = {
+        "easy_sorting":   grade_easy_sorting(agent_fn),
+        "medium_sorting": grade_medium_sorting(agent_fn),
+        "hard_sorting":   grade_hard_sorting(agent_fn),
     }
+    avg = round(sum(scores.values()) / len(scores), 4)
+    print(f"[GRADER] easy={scores['easy_sorting']} medium={scores['medium_sorting']} hard={scores['hard_sorting']} avg={avg}", flush=True)
+    return {"scores": scores, "average_score": avg}
 
 
 if __name__ == "__main__":
     print("Running all graders with baseline agent...\n")
     results = run_all_graders()
-    for r in results["tasks"]:
-        print(f"Task: {r['task']:15s} | Score: {r['score']} | {r['correct']}/{r['total']} correct")
+    for task_id, score in results["scores"].items():
+        print(f"Task: {task_id:20s} | Score: {score}")
     print(f"\nAverage Score: {results['average_score']}")

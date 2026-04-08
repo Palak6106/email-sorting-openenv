@@ -209,7 +209,6 @@ def run_with_graders():
     print("=" * 50)
     print(f"Inference Accuracy: {inference_results['accuracy']}%")
     print(f"Grader Average Score: {grader_results['average_score']}")
-    print(f"All Graders Passed: {grader_results['all_passed']}")
     print("=" * 50)
 
 

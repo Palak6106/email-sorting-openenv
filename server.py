@@ -92,13 +92,10 @@ def get_state():
 def run_graders():
     """Run all graders and return scores."""
     from graders import grade_easy_sorting, grade_medium_sorting, grade_hard_sorting
-    easy   = grade_easy_sorting()
-    medium = grade_medium_sorting()
-    hard   = grade_hard_sorting()
     tasks = [
-        GraderTask(task_id="easy_sorting",   score=easy["score"]),
-        GraderTask(task_id="medium_sorting",  score=medium["score"]),
-        GraderTask(task_id="hard_sorting",    score=hard["score"]),
+        GraderTask(task_id="easy_sorting",   score=grade_easy_sorting()),
+        GraderTask(task_id="medium_sorting",  score=grade_medium_sorting()),
+        GraderTask(task_id="hard_sorting",    score=grade_hard_sorting()),
     ]
     avg = round(sum(t.score for t in tasks) / len(tasks), 4)
     return GradersResponse(tasks=tasks, average_score=avg)
