@@ -75,11 +75,19 @@ def get_state():
 @app.get("/graders")
 def run_graders():
     """Run all graders and return scores."""
-    from graders import run_all_graders
-    results = run_all_graders()
+    from graders import grade_easy_sorting, grade_medium_sorting, grade_hard_sorting
+    easy   = grade_easy_sorting()
+    medium = grade_medium_sorting()
+    hard   = grade_hard_sorting()
+    tasks = [
+        {"id": "easy_sorting",   "score": easy["score"]},
+        {"id": "medium_sorting", "score": medium["score"]},
+        {"id": "hard_sorting",   "score": hard["score"]},
+    ]
+    avg = round(sum(t["score"] for t in tasks) / len(tasks), 4)
     return {
-        "status": "success",
-        "results": results
+        "tasks": tasks,
+        "average_score": avg
     }
 
 # ============================================
