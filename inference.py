@@ -1,4 +1,3 @@
-```python
 import os
 import json
 from openai import OpenAI
@@ -222,4 +221,3 @@ def run_with_graders():
 
 if __name__ == "__main__":
     run_with_graders()
-```
