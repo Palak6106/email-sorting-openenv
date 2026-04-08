@@ -1,9 +1,25 @@
 """
 graders.py — Email Sorting OpenEnv
-3 grader tasks: easy, medium, hard. Scores 0.0–1.0.
+3 grader tasks: easy, medium, hard. Scores strictly in (0, 1).
 """
 
-from env import EMAILS
+
+# ============================================
+# BASELINE AGENT (default for all graders)
+# ============================================
+
+def baseline_agent(email: dict) -> str:
+    text = (email.get("subject", "") + " " + email.get("body", "")).lower()
+    spam_kw  = ["won", "free", "prize", "claim", "urgent", "congratulations",
+                "selected", "suspended", "verify", "overdue", "pre-approved"]
+    promo_kw = ["off", "sale", "deal", "discount", "offer", "save",
+                "shop", "upgrade", "trial", "rewards", "loyalty"]
+    spam_score  = sum(1 for k in spam_kw  if k in text)
+    promo_score = sum(1 for k in promo_kw if k in text)
+    if spam_score >= 2:   return "spam"
+    if promo_score >= 1:  return "promotion"
+    return "important"
+
 
 # ============================================
 # TASK 1 — EASY: Obvious spam detection
@@ -18,18 +34,9 @@ EASY_EMAILS = [
 ]
 
 def grade_easy_sorting(agent_fn=None):
-    """
-    Easy task: classify obvious spam vs important emails.
-    agent_fn(email) -> 'spam' | 'important' | 'promotion'
-    Returns score strictly in (0.0, 1.0)
-    """
     if agent_fn is None:
         agent_fn = baseline_agent
-    correct = 0
-    for email in EASY_EMAILS:
-        prediction = agent_fn(email)
-        if prediction == email["label"]:
-            correct += 1
+    correct = sum(1 for e in EASY_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(EASY_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "easy_sorting", "correct": correct, "total": len(EASY_EMAILS), "score": score}
@@ -49,17 +56,9 @@ MEDIUM_EMAILS = [
 ]
 
 def grade_medium_sorting(agent_fn=None):
-    """
-    Medium task: classify emails across all 3 categories.
-    Returns score strictly in (0.0, 1.0)
-    """
     if agent_fn is None:
         agent_fn = baseline_agent
-    correct = 0
-    for email in MEDIUM_EMAILS:
-        prediction = agent_fn(email)
-        if prediction == email["label"]:
-            correct += 1
+    correct = sum(1 for e in MEDIUM_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(MEDIUM_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "medium_sorting", "correct": correct, "total": len(MEDIUM_EMAILS), "score": score}
@@ -81,37 +80,12 @@ HARD_EMAILS = [
 ]
 
 def grade_hard_sorting(agent_fn=None):
-    """
-    Hard task: subtle emails that are easy to misclassify.
-    Returns score strictly in (0.0, 1.0)
-    """
     if agent_fn is None:
         agent_fn = baseline_agent
-    correct = 0
-    for email in HARD_EMAILS:
-        prediction = agent_fn(email)
-        if prediction == email["label"]:
-            correct += 1
+    correct = sum(1 for e in HARD_EMAILS if agent_fn(e) == e["label"])
     raw = correct / len(HARD_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "hard_sorting", "correct": correct, "total": len(HARD_EMAILS), "score": score}
-
-
-# ============================================
-# SIMPLE RULE-BASED AGENT (for baseline)
-# ============================================
-
-def baseline_agent(email: dict) -> str:
-    text = (email.get("subject", "") + " " + email.get("body", "")).lower()
-    spam_kw  = ["won", "free", "prize", "claim", "urgent", "congratulations",
-                "selected", "suspended", "verify", "overdue", "pre-approved"]
-    promo_kw = ["off", "sale", "deal", "discount", "offer", "save",
-                "shop", "upgrade", "trial", "rewards", "loyalty"]
-    spam_score  = sum(1 for k in spam_kw  if k in text)
-    promo_score = sum(1 for k in promo_kw if k in text)
-    if spam_score >= 2:   return "spam"
-    if promo_score >= 1:  return "promotion"
-    return "important"
 
 
 # ============================================
@@ -122,20 +96,19 @@ def run_all_graders(agent_fn=None):
     if agent_fn is None:
         agent_fn = baseline_agent
 
-    results = []
-    results.append(grade_easy_sorting(agent_fn))
-    results.append(grade_medium_sorting(agent_fn))
-    results.append(grade_hard_sorting(agent_fn))
+    results = [
+        grade_easy_sorting(agent_fn),
+        grade_medium_sorting(agent_fn),
+        grade_hard_sorting(agent_fn),
+    ]
 
     avg_score = round(sum(r["score"] for r in results) / len(results), 4)
-    all_passed = all(r["score"] >= 0.0 for r in results)
-
     print(f"[GRADER] easy={results[0]['score']} medium={results[1]['score']} hard={results[2]['score']} avg={avg_score}", flush=True)
 
     return {
         "tasks": results,
         "average_score": avg_score,
-        "all_passed": all_passed
+        "all_passed": all(0 < r["score"] < 1 for r in results)
     }
 
 
@@ -143,5 +116,5 @@ if __name__ == "__main__":
     print("Running all graders with baseline agent...\n")
     results = run_all_graders()
     for r in results["tasks"]:
-        print(f"Task: {r['task']:8s} | Score: {r['score']} | {r['correct']}/{r['total']} correct")
+        print(f"Task: {r['task']:15s} | Score: {r['score']} | {r['correct']}/{r['total']} correct")
     print(f"\nAverage Score: {results['average_score']}")
