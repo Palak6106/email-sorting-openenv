@@ -17,18 +17,21 @@ EASY_EMAILS = [
     {"subject": "Your invoice is ready", "body": "Please find your monthly invoice attached.", "label": "important"},
 ]
 
-def grade_easy(agent_fn):
+def grade_easy(agent_fn=None):
     """
     Easy task: classify obvious spam vs important emails.
     agent_fn(email) -> 'spam' | 'important' | 'promotion'
-    Returns score 0.0–1.0
+    Returns score strictly in (0.0, 1.0)
     """
+    if agent_fn is None:
+        agent_fn = baseline_agent
     correct = 0
     for email in EASY_EMAILS:
         prediction = agent_fn(email)
         if prediction == email["label"]:
             correct += 1
-    score = round(correct / len(EASY_EMAILS), 2)
+    raw = correct / len(EASY_EMAILS)
+    score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "easy", "correct": correct, "total": len(EASY_EMAILS), "score": score}
 
 
@@ -45,17 +48,20 @@ MEDIUM_EMAILS = [
     {"subject": "Urgent: verify your account", "body": "Your account will be suspended. Click to verify.", "label": "spam"},
 ]
 
-def grade_medium(agent_fn):
+def grade_medium(agent_fn=None):
     """
     Medium task: classify emails across all 3 categories.
-    Returns score 0.0–1.0
+    Returns score strictly in (0.0, 1.0)
     """
+    if agent_fn is None:
+        agent_fn = baseline_agent
     correct = 0
     for email in MEDIUM_EMAILS:
         prediction = agent_fn(email)
         if prediction == email["label"]:
             correct += 1
-    score = round(correct / len(MEDIUM_EMAILS), 2)
+    raw = correct / len(MEDIUM_EMAILS)
+    score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "medium", "correct": correct, "total": len(MEDIUM_EMAILS), "score": score}
 
 
@@ -74,17 +80,20 @@ HARD_EMAILS = [
     {"subject": "You've been pre-approved!", "body": "You qualify for a $50,000 loan. Apply now.", "label": "spam"},
 ]
 
-def grade_hard(agent_fn):
+def grade_hard(agent_fn=None):
     """
     Hard task: subtle emails that are easy to misclassify.
-    Returns score 0.0–1.0
+    Returns score strictly in (0.0, 1.0)
     """
+    if agent_fn is None:
+        agent_fn = baseline_agent
     correct = 0
     for email in HARD_EMAILS:
         prediction = agent_fn(email)
         if prediction == email["label"]:
             correct += 1
-    score = round(correct / len(HARD_EMAILS), 2)
+    raw = correct / len(HARD_EMAILS)
+    score = round(min(0.99, max(0.01, raw)), 2)
     return {"task": "hard", "correct": correct, "total": len(HARD_EMAILS), "score": score}
 
 
