@@ -1,3 +1,12 @@
+---
+title: Email Sorting Openenv
+emoji: 📧
+colorFrom: blue
+colorTo: red
+sdk: docker
+pinned: false
+---
+
 # Email Sorting OpenEnv 📧
 
 A real-world OpenEnv environment where an AI agent learns to classify
