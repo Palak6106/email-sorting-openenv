@@ -17,7 +17,7 @@ EASY_EMAILS = [
     {"subject": "Your invoice is ready", "body": "Please find your monthly invoice attached.", "label": "important"},
 ]
 
-def grade_easy(agent_fn=None):
+def grade_easy_sorting(agent_fn=None):
     """
     Easy task: classify obvious spam vs important emails.
     agent_fn(email) -> 'spam' | 'important' | 'promotion'
@@ -32,7 +32,7 @@ def grade_easy(agent_fn=None):
             correct += 1
     raw = correct / len(EASY_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "easy", "correct": correct, "total": len(EASY_EMAILS), "score": score}
+    return {"task": "easy_sorting", "correct": correct, "total": len(EASY_EMAILS), "score": score}
 
 
 # ============================================
@@ -48,7 +48,7 @@ MEDIUM_EMAILS = [
     {"subject": "Urgent: verify your account", "body": "Your account will be suspended. Click to verify.", "label": "spam"},
 ]
 
-def grade_medium(agent_fn=None):
+def grade_medium_sorting(agent_fn=None):
     """
     Medium task: classify emails across all 3 categories.
     Returns score strictly in (0.0, 1.0)
@@ -62,7 +62,7 @@ def grade_medium(agent_fn=None):
             correct += 1
     raw = correct / len(MEDIUM_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "medium", "correct": correct, "total": len(MEDIUM_EMAILS), "score": score}
+    return {"task": "medium_sorting", "correct": correct, "total": len(MEDIUM_EMAILS), "score": score}
 
 
 # ============================================
@@ -80,7 +80,7 @@ HARD_EMAILS = [
     {"subject": "You've been pre-approved!", "body": "You qualify for a $50,000 loan. Apply now.", "label": "spam"},
 ]
 
-def grade_hard(agent_fn=None):
+def grade_hard_sorting(agent_fn=None):
     """
     Hard task: subtle emails that are easy to misclassify.
     Returns score strictly in (0.0, 1.0)
@@ -94,7 +94,7 @@ def grade_hard(agent_fn=None):
             correct += 1
     raw = correct / len(HARD_EMAILS)
     score = round(min(0.99, max(0.01, raw)), 2)
-    return {"task": "hard", "correct": correct, "total": len(HARD_EMAILS), "score": score}
+    return {"task": "hard_sorting", "correct": correct, "total": len(HARD_EMAILS), "score": score}
 
 
 # ============================================
@@ -123,9 +123,9 @@ def run_all_graders(agent_fn=None):
         agent_fn = baseline_agent
 
     results = []
-    results.append(grade_easy(agent_fn))
-    results.append(grade_medium(agent_fn))
-    results.append(grade_hard(agent_fn))
+    results.append(grade_easy_sorting(agent_fn))
+    results.append(grade_medium_sorting(agent_fn))
+    results.append(grade_hard_sorting(agent_fn))
 
     avg_score = round(sum(r["score"] for r in results) / len(results), 4)
     all_passed = all(r["score"] >= 0.0 for r in results)

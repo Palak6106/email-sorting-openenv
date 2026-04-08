@@ -62,21 +62,21 @@ tasks:
     description: "Sort obviously spam emails like prize winning scams"
     difficulty: easy
     score_range: [0.0, 1.0]
-    grader: graders.grade_easy
+    grader: graders.grade_easy_sorting
 
   - id: medium_sorting
     name: "Medium Email Sorting"
     description: "Distinguish between newsletters, promotions, and important emails"
     difficulty: medium
     score_range: [0.0, 1.0]
-    grader: graders.grade_medium
+    grader: graders.grade_medium_sorting
 
   - id: hard_sorting
     name: "Hard Email Sorting"
     description: "Detect phishing emails disguised as banks and trusted services"
     difficulty: hard
     score_range: [0.0, 1.0]
-    grader: graders.grade_hard
+    grader: graders.grade_hard_sorting
 
 episode:
   max_steps: 10
