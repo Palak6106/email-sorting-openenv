@@ -1,25 +1,53 @@
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Dict, Any
 from env import EmailSortingEnv
 
-# Create FastAPI app
 app = FastAPI(
     title="Email Sorting OpenEnv",
     description="Real-world email sorting environment for RL agents",
     version="1.0.0"
 )
 
-# One global environment instance
 env = EmailSortingEnv()
 
 # ============================================
-# REQUEST MODELS
+# PYDANTIC MODELS — typed Observation, Action, Reward
 # ============================================
+
+class EmailModel(BaseModel):
+    subject: str
+    body: str
+    sender: str
+
+class Observation(BaseModel):
+    email: EmailModel
+    step: int
+    max_steps: int
+    total_reward: float
+    done: bool
+    valid_actions: List[str]
 
 class StepRequest(BaseModel):
     action: str
+
+class StepResponse(BaseModel):
+    observation: Observation
+    reward: float
+    done: bool
+    info: Dict[str, Any]
+
+class ResetResponse(BaseModel):
+    observation: Observation
+
+class GraderTask(BaseModel):
+    task_id: str
+    score: float
+
+class GradersResponse(BaseModel):
+    tasks: List[GraderTask]
+    average_score: float
 
 # ============================================
 # API ENDPOINTS
@@ -27,52 +55,40 @@ class StepRequest(BaseModel):
 
 @app.get("/health")
 def health_check():
-    """Health check — must return 200."""
     return {"status": "ok", "message": "Email Sorting Environment is running"}
 
 @app.get("/")
 def root():
-    """Root endpoint."""
     return {
         "name": "Email Sorting OpenEnv",
         "version": "1.0.0",
         "description": "Sort emails as spam, important, or promotion",
-        "endpoints": ["/reset", "/step", "/state", "/health"]
+        "endpoints": ["/reset", "/step", "/state", "/graders", "/health"]
     }
 
-@app.post("/reset")
+@app.post("/reset", response_model=ResetResponse)
 def reset():
-    """Reset environment and return initial state."""
+    """Reset environment and return initial observation."""
     state = env.reset()
-    return {
-        "status": "success",
-        "state": state
-    }
+    return ResetResponse(observation=Observation(**state))
 
-@app.post("/step")
+@app.post("/step", response_model=StepResponse)
 def step(request: StepRequest):
-    """
-    Take action in environment.
-    Body: {"action": "spam"} or {"action": "important"} or {"action": "promotion"}
-    """
+    """Take action and return next observation, reward, done, info."""
     next_state, reward, done, info = env.step(request.action)
-    return {
-        "status": "success",
-        "state": next_state,
-        "reward": reward,
-        "done": done,
-        "info": info
-    }
+    return StepResponse(
+        observation=Observation(**next_state),
+        reward=reward,
+        done=done,
+        info=info
+    )
 
-@app.get("/state")
+@app.get("/state", response_model=ResetResponse)
 def get_state():
-    """Return current state without taking action."""
-    return {
-        "status": "success",
-        "state": env.state()
-    }
+    """Return current observation without taking action."""
+    return ResetResponse(observation=Observation(**env.state()))
 
-@app.get("/graders")
+@app.get("/graders", response_model=GradersResponse)
 def run_graders():
     """Run all graders and return scores."""
     from graders import grade_easy_sorting, grade_medium_sorting, grade_hard_sorting
@@ -80,15 +96,12 @@ def run_graders():
     medium = grade_medium_sorting()
     hard   = grade_hard_sorting()
     tasks = [
-        {"id": "easy_sorting",   "score": easy["score"]},
-        {"id": "medium_sorting", "score": medium["score"]},
-        {"id": "hard_sorting",   "score": hard["score"]},
+        GraderTask(task_id="easy_sorting",   score=easy["score"]),
+        GraderTask(task_id="medium_sorting",  score=medium["score"]),
+        GraderTask(task_id="hard_sorting",    score=hard["score"]),
     ]
-    avg = round(sum(t["score"] for t in tasks) / len(tasks), 4)
-    return {
-        "tasks": tasks,
-        "average_score": avg
-    }
+    avg = round(sum(t.score for t in tasks) / len(tasks), 4)
+    return GradersResponse(tasks=tasks, average_score=avg)
 
 # ============================================
 # START SERVER
