@@ -129,31 +129,31 @@ def run_inference():
 
     step_results = []
 
+    print(f"[START] task=email_sorting", flush=True)
+
     # Run until episode is done
     while not state["done"]:
         current_step = state["step"] + 1
         email = state["email"]
 
-        print(f"Step {current_step}/{state['max_steps']}")
         print(f"Subject: {email['subject']}")
         print(f"From:    {email['sender']}")
 
         # Ask AI to classify
         action = ask_llm_to_classify(email)
-        print(f"AI Decision: {action}")
 
         # Take step in environment
         next_state, reward, done, info = env.step(action)
 
-        print(f"Reward: {reward} | Result: {info.get('result', 'N/A')}")
-        print("-" * 40)
+        result = info.get("result", "N/A")
+        print(f"[STEP] step={current_step} action={action} reward={reward} result={result}", flush=True)
 
         step_results.append({
             "step": current_step,
             "subject": email["subject"],
             "action": action,
             "reward": reward,
-            "result": info.get("result", "N/A")
+            "result": result
         })
 
         state = next_state
@@ -175,7 +175,6 @@ def run_inference():
     print(f"Total Reward:   {total_reward}")
     print("=" * 50)
 
-    # Save results to file
     results = {
         "model": MODEL_NAME,
         "total_steps": total_steps,
@@ -185,10 +184,9 @@ def run_inference():
         "step_details": step_results
     }
 
-    with open("inference_results.json", "w") as f:
-        json.dump(results, f, indent=2)
+    score = round(correct_count / total_steps, 4) if total_steps > 0 else 0.0
+    print(f"[END] task=email_sorting score={score} steps={total_steps}", flush=True)
 
-    print("\nResults saved to inference_results.json")
     return results
 
 
