@@ -9,6 +9,4 @@ COPY . .
 
 EXPOSE 7860
 
-RUN pip install --no-cache-dir -e .
-
-CMD ["openenv-server"]
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
