@@ -61,25 +61,28 @@ tasks:
     name: "Easy Email Sorting"
     description: "Sort obviously spam emails like prize winning scams"
     difficulty: easy
-    score_range: [0.01, 0.99]
-    grader: grade_easy_sorting
-    grader_endpoint: /graders/easy_sorting
+    max_steps: 10
+    grader:
+      type: llm
+      prompt_template: "Score the agent's email classification performance from 0.0 to 1.0 based on accuracy. The agent must correctly classify obvious spam emails (prize scams, fake giveaways) vs important emails. A score of 1.0 means perfect classification, 0.0 means all wrong."
 
   - id: medium_sorting
     name: "Medium Email Sorting"
     description: "Distinguish between newsletters, promotions, and important emails"
     difficulty: medium
-    score_range: [0.01, 0.99]
-    grader: grade_medium_sorting
-    grader_endpoint: /graders/medium_sorting
+    max_steps: 10
+    grader:
+      type: llm
+      prompt_template: "Score the agent's email classification performance from 0.0 to 1.0. The agent must distinguish between spam, promotion, and important emails across 3 categories. A score of 1.0 means perfect classification, 0.0 means all wrong."
 
   - id: hard_sorting
     name: "Hard Email Sorting"
     description: "Detect phishing emails disguised as banks and trusted services"
     difficulty: hard
-    score_range: [0.01, 0.99]
-    grader: grade_hard_sorting
-    grader_endpoint: /graders/hard_sorting
+    max_steps: 10
+    grader:
+      type: llm
+      prompt_template: "Score the agent's email classification performance from 0.0 to 1.0. The agent must detect subtle phishing emails disguised as legitimate bank and service communications. A score of 1.0 means perfect classification, 0.0 means all wrong."
 
 episode:
   max_steps: 10
